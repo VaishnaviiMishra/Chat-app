@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, setDoc, doc } from "firebase/firestore"; // Import doc and setDoc
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirestore, setDoc, doc } from "firebase/firestore"; 
 import { toast } from "react-toastify";
 
 const firebaseConfig = {
@@ -17,15 +17,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth(app);
+const auth = getAuth(app); // Define and initialize auth
 const db = getFirestore(app);
 
+// Signup function
 const signup = async (username, email, password) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
 
-    // Correct usage of setDoc to set user information
+    // Set user information
     await setDoc(doc(db, "users", user.uid), {
       id: user.uid,
       username: username.toLowerCase(),
@@ -36,7 +37,7 @@ const signup = async (username, email, password) => {
       lastSeen: Date.now(),
     });
 
-    // Correct usage of setDoc to set chat data
+    // Set chat data
     await setDoc(doc(db, "chats", user.uid), {
       chatData: [],
     });
@@ -44,18 +45,30 @@ const signup = async (username, email, password) => {
     toast.success("Signup successful!");
   } catch (error) {
     console.error(error);
-    toast.error(error.code);
+    toast.error(error.code.split('/')[1].split('-').join(" "));
   }
 };
 
-const login = async(email,password) =>{
+// Login function
+const login = async (email, password) => {
   try {
-    await signInWithEmailAndPassword(auth,email,password);
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error(error);
-    toast.error(error.code);    
+    toast.error(error.code.split('/')[1].split('-').join(" "));
   }
+};
 
-}
+// Logout function
+const logout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error(error);
+    toast.error(error.code.split('/')[1].split('-').join(" "));
+  }
+};
 
-export { signup,login };
+// Export all necessary modules
+export { auth, signup, login, logout };
+

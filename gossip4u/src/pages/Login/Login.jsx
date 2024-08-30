@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Login.css';
 import assets from '../../assets/assets';
-import { signup } from '../../config/firebase';
+import { signup, login } from '../../config/firebase';
 
 const Login = () => {
   const [currState, setCurrState] = useState("Sign Up");
@@ -18,6 +18,9 @@ const Login = () => {
       } catch (error) {
         alert("Error creating account: " + error.message);
       }
+    }
+    else{
+      login(email,password)
     }
   };
 
