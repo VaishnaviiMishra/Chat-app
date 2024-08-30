@@ -14,6 +14,7 @@ const App = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => { 
       if (user) {
         navigate('/chat');
+        console.log(user); 
       } else {
         navigate('/');
       }
