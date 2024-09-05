@@ -5,6 +5,7 @@ import { getFirestore, setDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 // Firebase configuration object
+
 const firebaseConfig = {
   apiKey: "AIzaSyBz8fHbmUM_qAwEZz51F8AsiFozIVqpv6c",
   authDomain: "chatapp-78aae.firebaseapp.com",
@@ -40,7 +41,7 @@ const signup = async (username, email, password) => {
 
     // Set up chat data in Firestore
     await setDoc(doc(db, "chats", user.uid), {
-      chatData: [],
+      chatsData: [],
     });
 
     toast.success("Signup successful!");
@@ -72,5 +73,6 @@ const logout = async () => {
 
 // Export all necessary modules including db
 export { auth, db, signup, login, logout };
+
 
 

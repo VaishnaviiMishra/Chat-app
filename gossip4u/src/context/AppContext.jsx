@@ -1,21 +1,22 @@
 import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore"; 
-import { auth, db} from "../../src/config/firebase"; // Ensure correct import paths for auth and db
+import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../../src/config/firebase";
 
 export const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const [chatData, setChatData] = useState(null);
+  const [chatsData, setChatsData] = useState([]);
+  const [lastSeenIntervalId, setLastSeenIntervalId] = useState(null);
 
   // Function to load user data from Firestore
   const loadUserData = async (uid) => {
     try {
-      const UserRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(UserRef);
-      
+      const userRef = doc(db, 'users', uid);
+      const userSnap = await getDoc(userRef);
+
       if (!userSnap.exists()) {
         console.error("User does not exist in the database.");
         return;
@@ -32,42 +33,60 @@ const AppContextProvider = ({ children }) => {
       }
 
       // Update user's last seen timestamp
-      await updateDoc(UserRef, {
-        lastSeen: Date.now(),
-      });
+      await updateDoc(userRef, { lastSeen: Date.now() });
 
       // Set up interval to update lastSeen periodically
       const intervalId = setInterval(async () => {
         if (auth.currentUser) {
           try {
-            await updateDoc(UserRef, {
-              lastSeen: Date.now(),
-            });
+            await updateDoc(userRef, { lastSeen: Date.now() });
           } catch (error) {
             console.error("Error updating last seen:", error);
           }
         }
       }, 60000);
 
-      // Cleanup interval on component unmount or when dependencies change
-      return () => clearInterval(intervalId);
-      
+      setLastSeenIntervalId(intervalId);
+
     } catch (error) {
       console.error("Error loading user data:", error);
     }
   };
 
-  // Cleanup effect when AppContextProvider unmounts
   useEffect(() => {
-    return () => clearInterval(); // Ensure intervals are cleaned up
-  }, []);
+    if (userData) {
+      const chatRef = doc(db, 'chats', userData.id);
+      const unSub = onSnapshot(chatRef, async (res) => {
+        const chatItems = res.data()?.chatsData || [];
+        const tempData = await Promise.all(chatItems.map(async (item) => {
+          const userRef = doc(db, 'users', item.rId);
+          const userSnap = await getDoc(userRef);
+          const userData = userSnap.data();
+          return { ...item, userData };
+        }));
 
-  // Context value for consumption in other components
+        setChatsData(tempData.sort((a, b) => b.updatedAt - a.updatedAt));
+      });
+
+      return () => {
+        unSub();
+      };
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    return () => {
+      if (lastSeenIntervalId) {
+        clearInterval(lastSeenIntervalId);
+      }
+    };
+  }, [lastSeenIntervalId]);
+
   const value = {
     userData,
     setUserData,
-    chatData,
-    setChatData,
+    chatsData,
+    setChatsData,
     loadUserData,
   };
 
@@ -79,4 +98,5 @@ const AppContextProvider = ({ children }) => {
 };
 
 export default AppContextProvider;
+
 
