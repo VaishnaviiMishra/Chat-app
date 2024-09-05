@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import Login from './pages/Login/Login';
 import ProfileUpdate from './pages/ProfileUpdate/ProfileUpdate';
@@ -7,21 +7,39 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
+import { AppContext } from './context/AppContext';
 
 const App = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const { loadUserData } = useContext(AppContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // Track authentication state
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => { 
-      if (user) {
-        navigate('/chat');
-        console.log(user); 
-      } else {
-        navigate('/');
+    const checkAuthStatus = async (user) => {
+      try {
+        if (user) {
+          if (!isAuthenticated) {
+            setIsAuthenticated(true);
+            navigate('/chat');
+            await loadUserData(user.uid); // Load user data when authenticated
+          }
+        } else {
+          if (isAuthenticated !== false) {
+            setIsAuthenticated(false);
+            navigate('/');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error); // Error handling
       }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      checkAuthStatus(user); // Check the authentication status
     });
 
     return () => unsubscribe();
-  }, [navigate]); 
+  }, [navigate, loadUserData, isAuthenticated]);
 
   return (
     <>
@@ -36,4 +54,5 @@ const App = () => {
 };
 
 export default App;
+
 

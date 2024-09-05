@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, si
 import { getFirestore, setDoc, doc } from "firebase/firestore"; 
 import { toast } from "react-toastify";
 
+// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyBz8fHbmUM_qAwEZz51F8AsiFozIVqpv6c",
   authDomain: "chatapp-78aae.firebaseapp.com",
@@ -16,9 +17,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app); // Define and initialize auth
-const db = getFirestore(app);
+const analytics = getAnalytics(app); // Initialize analytics
+const auth = getAuth(app); // Initialize auth
+const db = getFirestore(app); // Initialize Firestore
 
 // Signup function
 const signup = async (username, email, password) => {
@@ -26,7 +27,7 @@ const signup = async (username, email, password) => {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
 
-    // Set user information
+    // Set user information in Firestore
     await setDoc(doc(db, "users", user.uid), {
       id: user.uid,
       username: username.toLowerCase(),
@@ -37,7 +38,7 @@ const signup = async (username, email, password) => {
       lastSeen: Date.now(),
     });
 
-    // Set chat data
+    // Set up chat data in Firestore
     await setDoc(doc(db, "chats", user.uid), {
       chatData: [],
     });
@@ -69,6 +70,7 @@ const logout = async () => {
   }
 };
 
-// Export all necessary modules
-export { auth, signup, login, logout };
+// Export all necessary modules including db
+export { auth, db, signup, login, logout };
+
 
