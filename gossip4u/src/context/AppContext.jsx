@@ -7,6 +7,10 @@ export const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
+  const [messages, setMessages] = useState([]);
+  const [messagesId, setMessagesId] = useState([]);
+  const [chatUser, setChatUser] = useState(null);
+  
   const [userData, setUserData] = useState(null);
   const [chatsData, setChatsData] = useState([]);
   const [lastSeenIntervalId, setLastSeenIntervalId] = useState(null);
@@ -88,6 +92,13 @@ const AppContextProvider = ({ children }) => {
     chatsData,
     setChatsData,
     loadUserData,
+    messages,
+    setMessages,
+    messagesId,
+    setMessagesId,
+    chatUser,
+    setChatUser,  
+
   };
 
   return (

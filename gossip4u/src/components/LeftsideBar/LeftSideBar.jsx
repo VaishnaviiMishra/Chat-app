@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState ,createContext } from 'react';
 import './LeftSideBar.css';
 import assets from '../../assets/assets';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css'; // Import toastify CSS
 
 const LeftSideBar = () => {
   const navigate = useNavigate();
-  const { userData, chatsData, chatUser, setChatUser,setMessagesId,messagesId } = useContext(AppContext);
+  const { userData, chatsData, chatUser, setChatUser,setMessagesId,messagesId} = useContext(AppContext);
   const [user, setUser] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
 
