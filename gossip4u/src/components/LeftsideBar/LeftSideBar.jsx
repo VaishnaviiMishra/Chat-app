@@ -1,136 +1,172 @@
-import React, { useContext, useState ,createContext } from 'react';
-import './LeftSideBar.css';
-import assets from '../../assets/assets';
-import { useNavigate } from 'react-router-dom';
-import { getDocs, collection, query, where, arrayUnion, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import React, { useContext, useEffect, useState } from 'react'
+import './LeftSidebar.css'
+import assets from '../../assets/assets'
 import { AppContext } from '../../context/AppContext';
-import { db } from '../../config/firebase';
-import { toast } from 'react-toastify'; // Import toast from react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import toastify CSS
+import { toast } from 'react-toastify';
+import { db, logout } from '../../config/firebase';
+import { arrayUnion, collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
-const LeftSideBar = () => {
-  const navigate = useNavigate();
-  const { userData, chatsData, chatUser, setChatUser,setMessagesId,messagesId} = useContext(AppContext);
-  const [user, setUser] = useState(null);
-  const [showSearch, setShowSearch] = useState(false);
+const LeftSidebar = () => {
 
-  const inputHandler = async (e) => {
-    try {
-      const input = e.target.value;
-      if (input) {
-        setShowSearch(true);
-        const userRef = collection(db, 'users');
-        const q = query(userRef, where('username', '==', input.toLowerCase()));
-        const querySnap = await getDocs(q);
+    const { chatData, userData, chatUser, setChatUser, setMessagesId, messagesId, chatVisible, setChatVisible } = useContext(AppContext);
+    const [user, setUser] = useState(null);
+    const [showSearch, setShowSearch] = useState(false)
+    const navigate = useNavigate();
 
-        if (!querySnap.empty) {
-          const foundUserId = querySnap.docs[0].data().id;
-          const userExist = chatsData ? chatsData.some((item) => item.rId === foundUserId) : false;
+    const inputHandler = async (e) => {
 
-          console.log('User exists in chatsData:', userExist); // Debugging log
+        try {
+            const input = e.target.value;
 
-          if (!userExist && foundUserId !== userData.id) {
-            setUser(querySnap.docs[0].data());
-          } else {
-            setUser(null);
-          }
-        } else {
-          setUser(null);
+            if (input) {
+                setShowSearch(true);
+                const userRef = collection(db, "users");
+                const q = query(userRef, where("username", "==", input.toLowerCase()));
+                const querySnap = await getDocs(q);
+                if (!querySnap.empty && querySnap.docs[0].data().id !== userData.id) {
+                    let userExist = false;
+                    chatData.map((user) => {
+                        if (user.rId === querySnap.docs[0].data().id) {
+                            userExist = true;
+                        }
+                    })
+                    if (!userExist) {
+                        setUser(querySnap.docs[0].data());
+                    }
+                }
+                else {
+                    setUser(null)
+                }
+            }
+            else {
+                setShowSearch(false);
+            }
+        } catch (error) {
+            toast.error(error.message)
         }
-      } else {
-        setShowSearch(false);
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
     }
-  };
 
-  const addChat = async () => {
-    const messagesRef = collection(db, 'messages');
-    const chatsRef = collection(db, 'chats');
-    try {
-      const newMessageRef = doc(messagesRef);
-      await setDoc(newMessageRef, {
-        createAt: serverTimestamp(),
-        messages: [],
-      });
-      await updateDoc(doc(chatsRef, user.id), {
-        chatsData: arrayUnion({
-          messagesId: newMessageRef.id,
-          lastMessage: '',
-          rId: userData.id,
-          updatedAt: Date.now(),
-          messageSeem: true,
-        }),
-      });
+    const addChat = async () => {
+        const messagesRef = collection(db, "messages");
+        const chatsRef = collection(db, "chats");
+        try {
+            if (user.id === userData.id) {
+                return 0
+            }
+            const newMessageRef = doc(messagesRef);
 
-      await updateDoc(doc(chatsRef, userData.id), {
-        chatsData: arrayUnion({
-          messagesId: newMessageRef.id,
-          lastMessage: '',
-          rId: user.id,
-          updatedAt: Date.now(),
-          messageSeem: true,
-        }),
-      });
+            await setDoc(newMessageRef, {
+                createAt: serverTimestamp(),
+                messages: []
+            })
 
-      toast.success('Chat added successfully!'); // Show success message
-    } catch (error) {
-      toast.error(error.message); // Show error message
-      console.error(error);
+            await updateDoc(doc(chatsRef, user.id), {
+                chatsData: arrayUnion({
+                    messageId: newMessageRef.id,
+                    lastMessage: "",
+                    rId: userData.id,
+                    updatedAt: Date.now(),
+                    messageSeen: true
+                }),
+            });
+
+            await updateDoc(doc(chatsRef, userData.id), {
+                chatsData: arrayUnion({
+                    messageId: newMessageRef.id,
+                    lastMessage: "",
+                    rId: user.id,
+                    updatedAt: Date.now(),
+                    messageSeen: true
+                }),
+            });
+
+            const uSnap = await getDoc(doc(db, "users", user.id));
+            const uData = uSnap.data();
+            setChat({
+                messageId: newMessageRef.id,
+                lastMessage: "",
+                rId: user.id,
+                updatedAt: Date.now(),
+                messageSeen: true,
+                userData: uData,
+            });
+            setShowSearch(false)
+            setChatVisible(true)
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
-  };
+
+    const setChat = async (item) => {
+        setMessagesId(item.messageId)
+        setChatUser(item)
+        const userChatsRef = doc(db, "chats", userData.id);
+        const userChatsSnapshot = await getDoc(userChatsRef);
+        const userChatsData = userChatsSnapshot.data();
+        const chatIndex = userChatsData.chatsData.findIndex((c) => c.messageId === item.messageId);
+        userChatsData.chatsData[chatIndex].messageSeen = true;
+        await updateDoc(userChatsRef, {
+            chatsData: userChatsData.chatsData,
+        });
+        setChatVisible(true)
+    }
+
+    useEffect(() => {
+        const updateChatUserData = async () => {
+            if (chatUser) {
+                const userRef = doc(db, "users", chatUser.userData.id);
+                const userSnap = await getDoc(userRef);
+                const userData = userSnap.data();
+                setChatUser(prev => ({ ...prev, userData: userData }))
+            }
+        }
+        updateChatUserData();
+    }, [chatData])
 
 
-  async function setChat(item) {
-    setMessagesId(item.messagesId);
-    setChatUser(item);
-  }
+    return (
+        <div className={`ls ${chatVisible ? "hidden" : ""}`}>
+            <div className='ls-top'>
+                <div className='ls-nav'>
+                    <img className='logo' src={assets.logo} alt="" />
+                    <div className='menu'>
+                        <img src={assets.menu_icon} alt="" />
+                        <div className='sub-menu'>
+                            <p onClick={() => navigate('/profile')}>Edit Profile</p>
+                            <hr />
+                            <p onClick={() => logout()}>Logout</p>
+                        </div>
+                    </div>
 
-  return (
-    <div className='ls'>
-      <div className='ls-top'>
-        <div className='ls-nav'>
-          <img src={assets.logo} className='logo' alt='logo' />
-          <div className='menu'>
-            <img src={assets.menu_icon} alt='menu icon' />
-            <div className='sub-menu'>
-              <p onClick={() => navigate('/profile')}>Edit Profile</p>
-              <hr />
-              <p onClick={() => navigate('/logout')}>Logout</p>
+                </div>
+                <div className="ls-search">
+                    <img src={assets.search_icon} alt="" />
+                    <input onChange={inputHandler} type="text" placeholder='Search here..' />
+                </div>
             </div>
-          </div>
-        </div>
-        <div className='ls-search'>
-          <img src={assets.search_icon} alt='search icon' />
-          <input onChange={inputHandler} type='text' placeholder='Search Here..' />
-        </div>
-      </div>
-      <div className='ls-list'>
-        {showSearch && user 
-          ? <div onClick={addChat} className='friends add-user'>
-            <img src={user.avatar || assets.default_avatar} alt='user avatar' />
-            <p>{user.name}</p>
-          </div>
-         : chatsData && chatsData.length > 0 
-           ? chatsData.map((item, index) => (
-            <div onClick={()=> setChat(item)} key={index} className='friends'>
-              <img src={item.userData.avatar} alt="" />
-              <div>
-                <p>{item.userData.name}</p>
-                <span>{item.lastMessage}</span>
-              </div>
+            <div className="ls-list">
+                {showSearch && user
+                    ? <div onClick={addChat} className='friends add-user'>
+                        <img src={user.avatar} alt="" />
+                        <p>{user.name}</p>
+                    </div>
+                    : chatData.map((item, index) => (
+                        <div onClick={() => setChat(item)} key={index} className={`friends ${item.messageSeen || item.messageId === messagesId ? "" : "border"}`}>
+                            <img src={item.userData.avatar} alt="" />
+                            <div>
+                                <p>{item.userData.name}</p>
+                                <span>{item.lastMessage.slice(0, 30)}</span>
+                            </div>
+                        </div>
+                    ))}
             </div>
-            ))
-           : <p>No chats available</p>
-        } 
-      </div>
-    </div>
-  );
-};
+        </div>
+    )
+}
 
-export default LeftSideBar;
+export default LeftSidebar
+
 
 
 
