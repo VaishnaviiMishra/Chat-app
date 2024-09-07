@@ -13,6 +13,7 @@ const ProfileUpdate = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
+  
   const [image, setImage] = useState(null);
   const [uid, setUid] = useState('');
   const [prevImage, setPrevImage] = useState(null);
