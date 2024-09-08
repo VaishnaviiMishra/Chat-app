@@ -5,9 +5,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base:'/Chat-app/',
   build: {
     outDir: 'dist', // This is where Vite outputs the bundled files
+    rollupOptions:{
+      input:{
+        main:'src/main.jsx'
+      }
+    }
   },
   resolve: {
     extensions: ['.js', '.jsx'], // Ensures Vite resolves both .js and .jsx
