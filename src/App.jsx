@@ -9,6 +9,7 @@ import Chat from './pages/Chat/Chat';
 import ProfileUpdate from './pages/ProfileUpdate/ProfileUpdate';
 import { AppContext } from './context/AppContext';
 
+
 const App = () => {
 
   const navigate = useNavigate();
