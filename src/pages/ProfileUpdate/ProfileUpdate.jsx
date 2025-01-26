@@ -133,7 +133,7 @@ const ProfileUpdate = () => {
           className='profile-pic'
           src={
             prevImage ||
-            (image ? URL.createObjectURL(image) : assets.logo_icon)
+            (image ? URL.createObjectURL(image) : assets.logo5)
           }
           alt='Profile'
         />

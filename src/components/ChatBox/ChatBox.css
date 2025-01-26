@@ -83,7 +83,7 @@
 }
 .msg {
   color: white;
-  background-color: #077EFF;
+  background-color: #390725;
   padding: 8px;
   max-width: 200px;
   font-size: 11px;
@@ -95,7 +95,7 @@
   border-radius: 8px 8px 8px 0px;
 }
 .s-msg .msg{
-  background-color: #3A36FF;
+  background-color: #b31d51;
 }
 .msg-img{
   max-width: 230px;

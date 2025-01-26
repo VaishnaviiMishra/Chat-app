@@ -1,6 +1,6 @@
 .profile{
   min-height: 100vh;
-  background: url(/background.png) no-repeat;
+  background: url(/src/assets/background.png) no-repeat;
   background-size: cover;
   display: flex;
   align-items: center;
@@ -45,12 +45,12 @@
   padding:10px;
   min-width: 300px;
   border: 1px solid #c9c9c9;
-  outline-color: #077EFF;
+  outline-color: #ff0787;
 }
 .profile form button{
   border: none;
   color: white;
-  background-color: #077EFF;
+  background-color: #ff0787;
   padding: 8px;
   font-size: 16px;
   cursor: pointer;

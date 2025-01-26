@@ -15,13 +15,20 @@ import add_icon from './add_icon.png'
 import menu_icon from './menu_icon.png'
 import arrow_icon from './arrow_icon.png'
 import green_dot from './green_dot.png'
-
+import logopink from './logopink.png'
+import mainName from './mainName.png'
+import talk from './talk.svg'
+import logo5 from './logo5.png'
 const assets = {
     avatar_icon,
     gallery_icon,
+    mainName,
     help_icon,
     logo_big,
+    logopink,
+    talk,
     logo_icon,
+    logo5,
     logo,
     pic1,
     pic2,

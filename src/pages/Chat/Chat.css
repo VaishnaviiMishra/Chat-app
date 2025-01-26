@@ -1,6 +1,6 @@
 .chat{
   min-height: 100vh;
-  background: linear-gradient(#596AFF,#383699);
+  background: linear-gradient(#f3a1c5,#9f1463);
   display:grid;
   place-items: center;
 }

@@ -1,5 +1,5 @@
 .ls {
-  background: #001030;
+  background: #30001b;
   color: white;
   height: 75vh;
 }
@@ -15,7 +15,11 @@
 }
 
 .ls-nav .logo {
-  max-width: 140px;
+  max-width: 80px;
+  margin-top: -35%;
+  margin-bottom: -30%;
+  margin-left: -10%;
+
 }
 
 .ls-nav .menu img {
@@ -56,12 +60,12 @@
 }
 
 .ls-search {
-  background-color: #002670;
+  background-color: #70004b;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .ls-search img {
@@ -113,7 +117,7 @@
 }
 
 .friends:hover {
-  background-color: #077EFF;
+  background-color: #ff0783;
 }
 .friends:hover span {
   color: white;
@@ -131,11 +135,11 @@
 }
 
 .friends.border img {
-  border: 3px solid #07fff3;
+  border: 3px solid #ff70b0;
 }
 
 .friends.border div span {
-  color: #07fff3;
+  color: #ff70b0;
 }
 @media (max-width:900px) {
   .ls{

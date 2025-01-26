@@ -1,6 +1,6 @@
 .rs{
   color: white;
-  background: #001030;
+  background: #30001b;
   position: relative;
   height: 75vh;
   overflow-y: scroll;
@@ -57,7 +57,7 @@
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #077EFF;
+  background: #ff0783;
   color: white;
   border: none;
   font-size: 12px;
