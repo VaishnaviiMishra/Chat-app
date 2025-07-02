@@ -12,4 +12,8 @@ export default defineConfig({
   resolve: {
     extensions: ['.js', '.jsx'], // Ensures Vite resolves both .js and .jsx
   },
+  server: {
+    host: '0.0.0.0', // Add this
+    port: 5173       // Explicit port
+  }
 });
